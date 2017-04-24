@@ -4,6 +4,8 @@ MAINTAINER Hortonworks
 # add ambari repo
 ADD ambari.repo /etc/yum.repos.d/
 
+# for ssh-copy-id
+RUN yum install -y sshpass
 # initscripts (service wrapper for servicectl) is need othewise the Ambari is unable to start postgresql
 RUN yum install -y ambari-server && yum clean all
 
