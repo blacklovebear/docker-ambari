@@ -30,4 +30,6 @@ RUN systemctl enable ambari-server
 
 RUN echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" >> /etc/systemd/system.conf
 
+VOLUME /var/log
+
 EXPOSE 8080

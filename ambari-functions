@@ -8,8 +8,9 @@ USAGE
 
 : ${NODE_PREFIX=amb}
 : ${AMBARI_SERVER_NAME:=${NODE_PREFIX}-server}
-: ${AMBARI_SERVER_IMAGE:="hortonworks/ambari-server:latest"}
-: ${AMBARI_AGENT_IMAGE:="hortonworks/ambari-agent:latest"}
+: ${AMBARI_SERVER_IMAGE:="registry.cn-hangzhou.aliyuncs.com/tospur/amb-server:latest"}
+: ${AMBARI_AGENT_IMAGE:="registry.cn-hangzhou.aliyuncs.com/tospur/amb-agent:latest"}
+: ${HTTPD_IMAGE:="registry.cn-hangzhou.aliyuncs.com/tospur/httpd:latest"}
 : ${DOCKER_OPTS:=""}
 : ${CONSUL:="${NODE_PREFIX}-consul"}
 : ${CONSUL_IMAGE:="sequenceiq/consul:v0.5.0-v6"}
@@ -34,6 +35,7 @@ amb-settings() {
   AMBARI_SERVER_NAME=$AMBARI_SERVER_NAME
   AMBARI_SERVER_IMAGE=$AMBARI_SERVER_IMAGE
   AMBARI_AGENT_IMAGE=$AMBARI_AGENT_IMAGE
+  HTTPD_IMAGE=$HTTPD_IMAGE
   DOCKER_OPTS=$DOCKER_OPTS
   AMBARI_SERVER_IP=$AMBARI_SERVER_IP
   CONSUL_IP=$CONSUL_IP
@@ -58,8 +60,8 @@ run-command() {
 }
 
 amb-clean() {
-  unset NODE_PREFIX AMBARI_SERVER_NAME AMBARI_SERVER_IMAGE AMBARI_AGENT_IMAGE DOCKER_OPTS CONSUL CONSUL_IMAGE DEBUG SLEEP_TIME AMBARI_SERVER_IP EXPOSE_DNS \
-        DRY_RUN CALICO_NET CONSUL_IP HDP_HOST_DIR HTTPD_NAME
+  unset NODE_PREFIX AMBARI_SERVER_NAME AMBARI_SERVER_IMAGE AMBARI_AGENT_IMAGE HTTPD_IMAGE CONSUL CONSUL_IMAGE DEBUG SLEEP_TIME AMBARI_SERVER_IP EXPOSE_DNS \
+        DRY_RUN CALICO_NET HDP_HOST_DIR HTTPD_NAME
 }
 
 get-ambari-server-ip() {
@@ -354,7 +356,7 @@ amb-start-HDP-httpd() {
   docker build -t my/httpd:latest ./httpd
   # 这里需要先将 HDP, HDP-UTILS-1.1.0.20 (centos 7) 放到 ${HDP_HOST_DIR}, 提供httpd访问
   # TODO: 必须检查配置路径的有效性
-  docker run --net ${CALICO_NET} --privileged=true  -itd --name $HTTPD_NAME -v ${HDP_HOST_DIR}:/usr/local/apache2/htdocs/ my/httpd:latest
+  docker run --net ${CALICO_NET} --privileged=true  -itd --name $HTTPD_NAME -v ${HDP_HOST_DIR}:/usr/local/apache2/htdocs/ $HTTPD_IMAGE
 
   set-host-ip $HTTPD_NAME
 }
