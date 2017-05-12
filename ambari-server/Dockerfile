@@ -4,13 +4,14 @@ MAINTAINER Hortonworks
 # add ambari repo
 ADD ambari.repo /etc/yum.repos.d/
 
-# for ssh-copy-id
-RUN yum install -y sshpass
-# initscripts (service wrapper for servicectl) is need othewise the Ambari is unable to start postgresql
-RUN yum install -y ambari-server && yum clean all
+
+RUN \
+    yum install -y sshpass mysql-connector-java* ambari-server \
+    && yum clean all \
+    && curl -o /tmp/ambari-shell.jar \
+        https://s3-eu-west-1.amazonaws.com/maven.sequenceiq.com/releases/com/sequenceiq/ambari-shell/0.1.25/ambari-shell-0.1.25.jar
 
 # add ambari shell to the image so new users don't need the 1GB java image
-RUN curl -o /tmp/ambari-shell.jar https://s3-eu-west-1.amazonaws.com/maven.sequenceiq.com/releases/com/sequenceiq/ambari-shell/0.1.25/ambari-shell-0.1.25.jar
 ADD shell/install-cluster.sh /tmp/
 ADD shell/wait-for-host-number.sh /tmp/
 ADD shell/ambari-shell.sh /tmp/
@@ -26,9 +27,7 @@ ADD http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.39.t
 ADD https://jdbc.postgresql.org/download/postgresql-9.4.1208.jre7.jar /var/lib/ambari-server/resources/postgres-jdbc-driver.jar
 
 ADD init/ambari-server.service /etc/systemd/system/ambari-server.service
-RUN systemctl enable ambari-server
-
-RUN echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" >> /etc/systemd/system.conf
+RUN systemctl enable ambari-server && echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" >> /etc/systemd/system.conf
 
 VOLUME /var/log
 
