@@ -6,7 +6,7 @@ ADD ambari.repo /etc/yum.repos.d/
 
 
 RUN \
-    yum install -y sshpass ambari-server \
+    yum install -y sshpass mysql-connector-java* ambari-server \
     && yum clean all \
     && curl -o /tmp/ambari-shell.jar \
         https://s3-eu-west-1.amazonaws.com/maven.sequenceiq.com/releases/com/sequenceiq/ambari-shell/0.1.25/ambari-shell-0.1.25.jar
