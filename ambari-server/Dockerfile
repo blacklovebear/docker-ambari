@@ -5,8 +5,8 @@ MAINTAINER Hortonworks
 ADD ambari.repo /etc/yum.repos.d/
 
 
-RUN \
-    yum install -y sshpass mysql-connector-java* ambari-server \
+RUN yum install -y sshpass mysql-connector-java* ambari-server \
+    && yum -y install ntp \
     && yum clean all \
     && curl -o /tmp/ambari-shell.jar \
         https://s3-eu-west-1.amazonaws.com/maven.sequenceiq.com/releases/com/sequenceiq/ambari-shell/0.1.25/ambari-shell-0.1.25.jar
@@ -27,7 +27,9 @@ ADD http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.39.t
 ADD https://jdbc.postgresql.org/download/postgresql-9.4.1208.jre7.jar /var/lib/ambari-server/resources/postgres-jdbc-driver.jar
 
 ADD init/ambari-server.service /etc/systemd/system/ambari-server.service
-RUN systemctl enable ambari-server && echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" >> /etc/systemd/system.conf
+RUN systemctl enable ambari-server \
+    && systemctl enable ntpd \
+    && echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" >> /etc/systemd/system.conf
 
 VOLUME /var/log
 

@@ -4,7 +4,10 @@ MAINTAINER Hortonworks
 # add ambari repo
 ADD ambari.repo /etc/yum.repos.d/
 
-RUN yum install -y  ambari-agent && yum clean all
+RUN yum install -y ambari-agent \
+    && yum -y install ntp \
+    && yum clean all
+
 #RUN find /etc/rc.d/rc* -name "*ambari-agent" | xargs rm -v
 
 # add a custom folder to the hadoop classpath
@@ -28,7 +31,8 @@ RUN chmod u+x /opt/ambari-agent/init-agent.sh
 
 ADD init/ambari-agent.service /etc/systemd/system/ambari-agent.service
 
-RUN systemctl enable ambari-agent
+RUN systemctl enable ambari-agent \
+    && systemctl enable ntpd
 
 RUN echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" \"HADOOP_CLASSPATH=$HADOOP_CLASSPATH\" >> /etc/systemd/system.conf
 
