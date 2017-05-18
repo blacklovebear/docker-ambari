@@ -30,6 +30,7 @@ ADD init/init-agent.sh /opt/ambari-agent/init-agent.sh
 RUN chmod u+x /opt/ambari-agent/init-agent.sh
 
 ADD init/ambari-agent.service /etc/systemd/system/ambari-agent.service
+ADD ntp.conf /etc/ntp.conf
 
 RUN systemctl enable ambari-agent \
     && systemctl enable ntpd
