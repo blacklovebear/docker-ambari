@@ -1,8 +1,7 @@
 FROM centos:7
 MAINTAINER Hortonworks
 
-RUN yum install epel-release -y && yum clean all
-RUN yum update -y && yum clean all
+RUN yum install epel-release -y && yum update -y && yum clean all
 
 #Setting up systemd
 ENV container docker
@@ -19,7 +18,9 @@ ENTRYPOINT ["/usr/sbin/init"]
 
 RUN yum install -y systemd* && yum clean all
 
-RUN yum install -y yum-utils yum-plugin-ovl tar git curl bind-utils unzip wget && yum clean all
+RUN yum install -y yum-utils yum-plugin-ovl tar git curl bind-utils unzip wget \
+    net-tools sudo pdsh \
+    && yum clean all
 
 # Setup sshd
 RUN yum install -y openssh-server openssh-clients && yum clean all
@@ -45,6 +46,9 @@ ENV PATH $PATH:$JAVA_HOME/bin
 # jce
 ADD http://public-repo-1.hortonworks.com/ARTIFACTS/UnlimitedJCEPolicyJDK7.zip $JAVA_HOME/jre/lib/security/
 RUN cd $JAVA_HOME/jre/lib/security && unzip UnlimitedJCEPolicyJDK7.zip && rm -f UnlimitedJCEPolicyJDK7.zip && mv UnlimitedJCEPolicy/*jar . && rm -rf UnlimitedJCEPolicy
+
+# trafodion
+RUN useradd trafodion
 
 ADD etc/yum.conf /etc/yum.conf 
 
