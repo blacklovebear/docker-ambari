@@ -1,4 +1,5 @@
-FROM hortonworks/ambari-base:7.2-v7
+# FROM hortonworks/ambari-base:7.2-v7
+FROM registry.cn-hangzhou.aliyuncs.com/tospur/amb-base
 MAINTAINER Hortonworks
 
 # add ambari repo

@@ -1,8 +1,13 @@
-FROM hortonworks/ambari-base:7.2-v7
+# FROM hortonworks/ambari-base:7.2-v7
+FROM registry.cn-hangzhou.aliyuncs.com/tospur/amb-base
 MAINTAINER Hortonworks
 
 # add ambari repo
 ADD ambari.repo /etc/yum.repos.d/
+
+# prepare for trafodion
+RUN yum install -y apr apr-util sqlite expect perl-DBD-SQLite* \
+    protobuf xerces-c perl-Params-Validate perl-Time-HiRes gzip lzo lzop unzip
 
 RUN yum install -y ambari-agent \
     && yum -y install ntp \
