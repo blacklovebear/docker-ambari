@@ -10,7 +10,7 @@ RUN yum install -y apr apr-util sqlite expect perl-DBD-SQLite* \
     protobuf xerces-c perl-Params-Validate perl-Time-HiRes gzip lzo lzop unzip
 
 RUN yum install -y ambari-agent \
-    && yum -y install ntp \
+    && yum -y install sshpass ntp \
     && yum clean all
 
 #RUN find /etc/rc.d/rc* -name "*ambari-agent" | xargs rm -v
