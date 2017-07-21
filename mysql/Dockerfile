@@ -1,8 +1,7 @@
-FROM mysql:5.7.15
+FROM mysql:5.6.36
 
-MAINTAINER zhoupeng
-
-# ENV MYSQL_DATABASE=<schema_name> MYSQL_ROOT_PASSWORD=<password>
+COPY ./mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
+COPY ./mysql.cnf /etc/mysql/conf.d/mysql.cnf
 
 ADD schema.sql /docker-entrypoint-initdb.d
 

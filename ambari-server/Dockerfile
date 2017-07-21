@@ -6,7 +6,7 @@ MAINTAINER Hortonworks
 ADD ambari.repo /etc/yum.repos.d/
 
 
-RUN yum install -y sshpass mysql-connector-java* ambari-server \
+RUN yum install -y sshpass mysql mysql-connector-java* ambari-server \
     && yum -y install ntp \
     && yum clean all \
     && curl -o /tmp/ambari-shell.jar \

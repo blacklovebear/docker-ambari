@@ -32,9 +32,18 @@ search service.consul node.dc1.consul
 EOF
 }
 
-wait_for_db() {
+wait_PG_for_db() {
   while : ; do
     PGPASSWORD=bigdata psql -h $POSTGRES_DB -U ambari -c "select 1"
+    [[ $? == 0 ]] && break
+    sleep 5
+  done
+}
+
+
+wait_MYSQL_for_db() {
+  while : ; do
+    mysql -h $MYSQL_DB -P 3306 -u ambari -p123456 ambari -e "select 1"
     [[ $? == 0 ]] && break
     sleep 5
   done
@@ -49,16 +58,23 @@ reorder_dns_lookup() {
 }
 
 config_remote_jdbc() {
-  if [ -z "$POSTGRES_DB" ]
-  then
-    ambari-server setup --silent --java-home $JAVA_HOME
-  else
+  if [ -n "$POSTGRES_DB" ];then
     echo Configure remote jdbc connection
     ambari-server setup --silent --java-home $JAVA_HOME --database postgres --databasehost $POSTGRES_DB --databaseport 5432 --databasename postgres \
          --postgresschema postgres --databaseusername ambari --databasepassword bigdata
-    wait_for_db
+    wait_PG_for_db
     PGPASSWORD=bigdata psql -h $POSTGRES_DB -U ambari postgres < /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
+  elif [ -n "$MYSQL_DB" ];then
+    echo Configure remote jdbc connection
+    ambari-server setup --silent --java-home $JAVA_HOME --database=mysql --databasehost='$MYSQL_DB' \
+    --databaseport=3306 --databasename=ambari --databaseusername=ambari \
+    --databasepassword='123456' --jdbc-db=mysql --jdbc-driver=/usr/share/java/mysql-connector-java.jar 
+    wait_MYSQL_for_db
+    mysql -h $MYSQL_DB -P 3306 -u ambari -p123456 ambari <  /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
+  else
+    ambari-server setup --silent --java-home $JAVA_HOME
   fi
+    
 }
 
 # https://issues.apache.org/jira/browse/AMBARI-14627
