@@ -32,7 +32,7 @@ ADD ntp.conf /etc/ntp.conf
 
 RUN systemctl enable ambari-server \
     && systemctl enable ntpd \
-    && echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" >> /etc/systemd/system.conf
+    && echo DefaultEnvironment=\"JAVA_HOME=$JAVA_HOME\" \"MYSQL_DB=mysql.service.consul\" >> /etc/systemd/system.conf
 
 VOLUME /var/log
 
