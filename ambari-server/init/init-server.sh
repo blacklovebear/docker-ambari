@@ -6,7 +6,7 @@
 [[ "TRACE" ]] && set -x
 
 debug() {
-  [[ "DEBUG" ]]  && echo "[DEBUG] $@" 1>&2
+  [[ "DEBUG" ]]  && echo "[DEBUG] $@" >> /tmp/ambari-init-executed.log
 }
 
 # get_nameserver_addr() {
@@ -58,19 +58,22 @@ reorder_dns_lookup() {
 }
 
 config_remote_jdbc() {
+  debug mysql_db:$MYSQL_DB, postgres_db:$POSTGRES_DB
+
   if [ -n "$POSTGRES_DB" ];then
-    echo Configure remote POSTGRES_DB jdbc connection >> /var/ambari-init-executed.log
+    debug Configure remote POSTGRES_DB jdbc connection
     ambari-server setup --silent --java-home $JAVA_HOME --database postgres --databasehost $POSTGRES_DB --databaseport 5432 --databasename postgres \
         --postgresschema postgres --databaseusername ambari --databasepassword bigdata
     wait_PG_for_db
     PGPASSWORD=bigdata psql -h $POSTGRES_DB -U ambari postgres < /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
   elif [ -n "$MYSQL_DB" ];then
-    echo Configure remote MYSQL_DB jdbc connection >> /var/ambari-init-executed.log
+    debug Configure remote MYSQL_DB jdbc connection
     ambari-server setup --silent --java-home $JAVA_HOME --database mysql --databasehost $MYSQL_DB --databaseport 3306 --databasename ambari \
         --databaseusername ambari --databasepassword 123456
     wait_MYSQL_for_db
     mysql -h $MYSQL_DB -P 3306 -u ambari -p123456 ambari <  /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
   else
+    debug Configure default jdbc connection
     ambari-server setup --silent --java-home $JAVA_HOME
   fi
     
@@ -97,11 +100,13 @@ silent_security_setup() {
 main() {
   # [[ "$USE_CONSUL_DNS" == "true" ]] && local_nameserver
   reorder_dns_lookup
-  if [ ! -f "/var/ambari-init-executed" ]; then
+  if [ ! -f "/tmp/ambari-init-executed" ]; then
+    debug start config
     config_remote_jdbc
     silent_security_setup
+    debug end config
   fi
-  echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/ambari-init-executed
+  echo $(date +%Y-%m-%d:%H:%M:%S) >> /tmp/ambari-init-executed
 }
 
 main "$@"
