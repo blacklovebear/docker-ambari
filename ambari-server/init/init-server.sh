@@ -59,15 +59,15 @@ reorder_dns_lookup() {
 
 config_remote_jdbc() {
   if [ -n "$POSTGRES_DB" ];then
-    echo Configure remote jdbc connection
+    echo Configure remote POSTGRES_DB jdbc connection >> /var/ambari-init-executed.log
     ambari-server setup --silent --java-home $JAVA_HOME --database postgres --databasehost $POSTGRES_DB --databaseport 5432 --databasename postgres \
         --postgresschema postgres --databaseusername ambari --databasepassword bigdata
     wait_PG_for_db
     PGPASSWORD=bigdata psql -h $POSTGRES_DB -U ambari postgres < /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
   elif [ -n "$MYSQL_DB" ];then
-    echo Configure remote jdbc connection
+    echo Configure remote MYSQL_DB jdbc connection >> /var/ambari-init-executed.log
     ambari-server setup --silent --java-home $JAVA_HOME --database mysql --databasehost $MYSQL_DB --databaseport 3306 --databasename ambari \
-        --databaseusername ambari --databasepassword 123456 --jdbc-db mysql --jdbc-driver /usr/share/java/mysql-connector-java.jar 
+        --databaseusername ambari --databasepassword 123456
     wait_MYSQL_for_db
     mysql -h $MYSQL_DB -P 3306 -u ambari -p123456 ambari <  /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
   else
