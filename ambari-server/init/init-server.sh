@@ -9,28 +9,28 @@ debug() {
   [[ "DEBUG" ]]  && echo "[DEBUG] $@" 1>&2
 }
 
-get_nameserver_addr() {
-  if [[ "$NAMESERVER_ADDR" ]]; then
-    echo $NAMESERVER_ADDR
-  else
-    if ip addr show docker0 &> /dev/null; then
-      ip addr show docker0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1
-    else
-      ip ro | grep default | cut -d" " -f 3
-    fi
-  fi
-}
+# get_nameserver_addr() {
+#   if [[ "$NAMESERVER_ADDR" ]]; then
+#     echo $NAMESERVER_ADDR
+#   else
+#     if ip addr show docker0 &> /dev/null; then
+#       ip addr show docker0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1
+#     else
+#       ip ro | grep default | cut -d" " -f 3
+#     fi
+#   fi
+# }
 
 # --dns isn't available for: docker run --net=host
 # sed -i /etc/resolf.conf fails:
 # sed: cannot rename /etc/sedU9oCRy: Device or resource busy
 # here comes the tempfile workaround ...
-local_nameserver() {
-  cat>/etc/resolv.conf<<EOF
-nameserver $(get_nameserver_addr)
-search service.consul node.dc1.consul
-EOF
-}
+# local_nameserver() {
+#   cat>/etc/resolv.conf<<EOF
+# nameserver $(get_nameserver_addr)
+# search service.consul node.dc1.consul
+# EOF
+# }
 
 wait_PG_for_db() {
   while : ; do
@@ -61,14 +61,13 @@ config_remote_jdbc() {
   if [ -n "$POSTGRES_DB" ];then
     echo Configure remote jdbc connection
     ambari-server setup --silent --java-home $JAVA_HOME --database postgres --databasehost $POSTGRES_DB --databaseport 5432 --databasename postgres \
-         --postgresschema postgres --databaseusername ambari --databasepassword bigdata
+        --postgresschema postgres --databaseusername ambari --databasepassword bigdata
     wait_PG_for_db
     PGPASSWORD=bigdata psql -h $POSTGRES_DB -U ambari postgres < /var/lib/ambari-server/resources/Ambari-DDL-Postgres-CREATE.sql
   elif [ -n "$MYSQL_DB" ];then
     echo Configure remote jdbc connection
-    ambari-server setup --silent --java-home $JAVA_HOME --database=mysql --databasehost='$MYSQL_DB' \
-    --databaseport=3306 --databasename=ambari --databaseusername=ambari \
-    --databasepassword='123456' --jdbc-db=mysql --jdbc-driver=/usr/share/java/mysql-connector-java.jar 
+    ambari-server setup --silent --java-home $JAVA_HOME --database mysql --databasehost $MYSQL_DB --databaseport 3306 --databasename ambari \
+        --databaseusername ambari --databasepassword 123456 --jdbc-db mysql --jdbc-driver /usr/share/java/mysql-connector-java.jar 
     wait_MYSQL_for_db
     mysql -h $MYSQL_DB -P 3306 -u ambari -p123456 ambari <  /var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
   else
@@ -96,7 +95,7 @@ silent_security_setup() {
 }
 
 main() {
-  [[ "$USE_CONSUL_DNS" == "true" ]] && local_nameserver
+  # [[ "$USE_CONSUL_DNS" == "true" ]] && local_nameserver
   reorder_dns_lookup
   if [ ! -f "/var/ambari-init-executed" ]; then
     config_remote_jdbc
