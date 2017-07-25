@@ -4,5 +4,6 @@ COPY ./mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
 COPY ./mysql.cnf /etc/mysql/conf.d/mysql.cnf
 
 ADD schema.sql /docker-entrypoint-initdb.d
+ADD ebd.sql /docker-entrypoint-initdb.d
 
 EXPOSE 3306
