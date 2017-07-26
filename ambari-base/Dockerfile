@@ -23,7 +23,8 @@ RUN yum install -y yum-utils yum-plugin-ovl tar git curl bind-utils unzip wget \
     && yum clean all
 
 # Setup sshd
-RUN yum install -y openssh-server openssh-clients && yum clean all
+RUN yum install -y openssh-server openssh-clients sshpass \
+    && yum clean all
 RUN systemctl enable sshd
 
 # kerberos client
